@@ -6,5 +6,5 @@ export type {
   Tables,
   TablesInsert,
   TablesUpdate,
-} from "./database.types";
-export { Constants } from "./database.types";
+} from './database.types';
+export { Constants } from './database.types';
