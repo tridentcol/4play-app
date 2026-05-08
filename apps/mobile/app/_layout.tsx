@@ -18,6 +18,7 @@ import {
   JetBrainsMono_600SemiBold,
 } from '@expo-google-fonts/jetbrains-mono';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import * as Notifications from 'expo-notifications';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -25,6 +26,7 @@ import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAuthState } from '../lib/auth';
+import { registerForPushNotificationsAsync, resolveDeepLink } from '../lib/push';
 
 SplashScreen.preventAutoHideAsync().catch(() => {
   // Splash already hidden — no-op.
@@ -66,6 +68,23 @@ export default function RootLayout() {
       router.replace('/');
     }
   }, [fontsLoaded, auth.status, segments, router]);
+
+  // Register for push notifications once authenticated.
+  useEffect(() => {
+    if (auth.status === 'authenticated') {
+      void registerForPushNotificationsAsync(auth.session.user.id);
+    }
+  }, [auth.status, auth]);
+
+  // Deep-link from notification taps.
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data as Record<string, unknown> | null;
+      const path = resolveDeepLink(data);
+      if (path) router.push(path as never);
+    });
+    return () => sub.remove();
+  }, [router]);
 
   if (!fontsLoaded || auth.status === 'loading') {
     return null;
