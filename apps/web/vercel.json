@@ -1,0 +1,6 @@
+{
+  "buildCommand": "cd ../.. && pnpm install --frozen-lockfile && pnpm -F @4play/web build",
+  "installCommand": "echo skip-install",
+  "framework": "nextjs",
+  "regions": ["iad1"]
+}
