@@ -1,3 +1,4 @@
+import { track } from '@4play/core';
 import { IconCalendar, IconSend, colors } from '@4play/ui';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -50,6 +51,7 @@ export default function ChatDetail() {
     setBody('');
     try {
       await send.mutateAsync(trimmed);
+      track('message_sent', { conversation_id: conversationId });
     } catch {
       setBody(trimmed);
     }

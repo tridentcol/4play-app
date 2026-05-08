@@ -1,7 +1,8 @@
+import { track } from '@4play/core';
 import { IconCheck, IconX, colors } from '@4play/ui';
 import { Stack, router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -16,6 +17,10 @@ const BENEFITS = [
 
 export default function Paywall() {
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    track('paywall_viewed');
+  }, []);
 
   const start = async () => {
     setLoading(true);

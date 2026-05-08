@@ -1,5 +1,5 @@
 import type { TablesInsert } from '@4play/core';
-import { type Sport, sportSchema, usernameSchema } from '@4play/core';
+import { type Sport, sportSchema, track, usernameSchema } from '@4play/core';
 import { IconArrow, IconCheck, colors } from '@4play/ui';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
@@ -123,6 +123,7 @@ export default function ProfileSetup() {
       return;
     }
     setSubmitting(false);
+    track('signup_completed', { sport: data.sport, level: data.level });
     router.replace('/');
   };
 

@@ -1,4 +1,4 @@
-import type { TablesInsert } from '@4play/core';
+import { type TablesInsert, track } from '@4play/core';
 import { IconArrow, colors } from '@4play/ui';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
@@ -64,6 +64,7 @@ export default function NewBooking() {
         .select('id')
         .single();
       if (error) throw error;
+      track('booking_started', { booking_id: inserted.id, total_amount: totalAmount });
       router.replace({
         pathname: '/booking/[bookingId]/checkout',
         params: { bookingId: inserted.id },

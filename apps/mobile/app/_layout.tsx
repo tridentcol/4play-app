@@ -2,6 +2,7 @@ import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import '../global.css';
 
+import { identify, resetAnalytics } from '@4play/core';
 import {
   BricolageGrotesque_700Bold,
   useFonts as useBricolage,
@@ -26,6 +27,7 @@ import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAuthState } from '../lib/auth';
+import { initObservability } from '../lib/observability';
 import { registerForPushNotificationsAsync, resolveDeepLink } from '../lib/push';
 
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -69,10 +71,18 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, auth.status, segments, router]);
 
-  // Register for push notifications once authenticated.
+  // Initialize Sentry + PostHog once on boot.
+  useEffect(() => {
+    void initObservability();
+  }, []);
+
+  // Register for push notifications + analytics identity once authenticated.
   useEffect(() => {
     if (auth.status === 'authenticated') {
       void registerForPushNotificationsAsync(auth.session.user.id);
+      identify(auth.session.user.id);
+    } else if (auth.status === 'unauthenticated') {
+      resetAnalytics();
     }
   }, [auth.status, auth]);
 

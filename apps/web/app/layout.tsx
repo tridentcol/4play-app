@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Bricolage_Grotesque, Inter, JetBrains_Mono } from 'next/font/google';
+import { Providers } from './providers';
 import './globals.css';
 
 const bricolage = Bricolage_Grotesque({
@@ -32,7 +33,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       lang="es-CO"
       className={`${bricolage.variable} ${inter.variable} ${jetbrains.variable} h-full antialiased`}
     >
-      <body className="font-body min-h-full flex flex-col bg-cream text-ink">{children}</body>
+      <body className="font-body min-h-full flex flex-col bg-cream text-ink">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
