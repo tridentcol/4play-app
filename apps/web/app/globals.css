@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    background-color: #f4f0e8;
+    color: #0e1b2c;
+    font-family: var(--font-body), Inter, -apple-system, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
