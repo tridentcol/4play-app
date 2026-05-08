@@ -1,29 +1,67 @@
 # 4 PLAY
 
 Red social vertical para tenis y pádel — Cartagena primero, Colombia después.
+Matchmaking estilo swipe, DM en tiempo real, reservas de cancha y membresía
+4 PLAY+ a $20.000 COP/mes.
 
-Monorepo (pnpm + Turborepo):
+## Stack
 
-- `apps/mobile` — Expo (React Native) — _por crear en Step 5_
-- `apps/web` — Next.js 15 — _por crear en Step 4_
-- `packages/ui` — design tokens, brand y componentes compartidos
-- `packages/core` — schemas Zod, lógica pura compartida
-- `packages/db` — tipos Supabase + queries reutilizables
-- `packages/config` — base TypeScript + Biome
+- Turborepo + pnpm workspaces
+- **Web:** Next.js 15 + React 18 + Tailwind 3 + `@supabase/ssr`
+- **Mobile:** Expo SDK 54 + Expo Router + NativeWind 4 + `@supabase/supabase-js`
+- **Backend:** Supabase (Postgres + PostGIS + Realtime + Auth + Storage + Edge
+  Functions)
+- **Pagos:** Wompi (sandbox/prod)
+- **Notificaciones:** Expo Push + Resend (transaccionales)
+- **Observabilidad:** Sentry + PostHog (gated por env vars)
+
+## Layout
+
+- `apps/web` — landing, auth, checkout, legal, `/dev/design-check`
+- `apps/mobile` — onboarding, tabs, swipe, chat, bookings, paywall
+- `packages/ui` — tokens + LogoMark + Logo + 14 iconos data-driven (web + RN)
+- `packages/core` — zod schemas, analytics facade, microcopy, types
+- `packages/db` — `Database` regenerada de Supabase
+- `packages/config` — `tsconfig.base` + `biome.json` compartidos
+- `supabase/migrations` — schema versionado
+- `supabase/functions` — `push-fanout`, `send-email`
+- `design/` — mockups React verbatim (fuente de verdad visual)
+- `docs/DESIGN-AUDIT.md` — gate visual antes de submission
+- `docs/LAUNCH.md` — playbook App Store / Play
+- `DEPLOY.md` — runbook Vercel / EAS / Supabase / Wompi
 
 ## Requisitos
 
-- Node.js 20+ (recomendado 20 LTS o 24)
-- pnpm 9 (vía corepack: `corepack pnpm <cmd>`)
+- Node.js 20+
+- pnpm 9 (`npm i -g pnpm@9.15.0`)
 
-## Comandos
+## Setup
 
 ```bash
-corepack pnpm install
-corepack pnpm dev        # turbo run dev en todos los workspaces
-corepack pnpm lint
-corepack pnpm typecheck
-corepack pnpm format
+pnpm install
+cp .env.example .env             # rellena las claves listadas en DEPLOY.md
+pnpm -F @4play/web dev           # http://localhost:3000
+pnpm -F @4play/mobile dev        # luego `i` (iOS) o `a` (Android)
 ```
 
-Ver `BLUEPRINT.md` para el plan completo y `docs/` (a partir del Step 14) para deployment.
+## Workflows
+
+```bash
+pnpm -r typecheck                # tsc --noEmit en todos los paquetes
+pnpm -r lint                     # biome check
+pnpm -F @4play/web build         # next build
+pnpm -F @4play/mobile dev        # expo start
+```
+
+## Build order
+
+Sigue `BLUEPRINT.md` sección 9. Los 17 steps están commiteados en orden y
+verificables desde `git log --oneline`. Cualquier desviación está documentada
+en el commit message correspondiente.
+
+## Próximos pasos
+
+1. Provisionar cuentas externas (Vercel, EAS, Apple Developer, Google Play,
+   Wompi prod, Sentry, PostHog, Resend) siguiendo `DEPLOY.md`.
+2. Correr el audit visual en `docs/DESIGN-AUDIT.md` con la app en simulador.
+3. Submission a App Store y Play siguiendo `docs/LAUNCH.md`.
