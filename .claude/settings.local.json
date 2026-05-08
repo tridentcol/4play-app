@@ -4,7 +4,8 @@
       "PowerShell(corepack *)",
       "PowerShell(npm install *)",
       "PowerShell(pnpm exec *)",
-      "PowerShell(git *)"
+      "PowerShell(git *)",
+      "PowerShell(pnpm add *)"
     ]
   }
 }
