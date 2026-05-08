@@ -1,72 +1,54 @@
 import { installAnalytics, installErrors } from '@4play/core';
 
 /**
- * Wires Sentry + PostHog into the @4play/core analytics facade. Falls
- * back to the default no-op when env vars are missing, so the app
- * keeps shipping events to console while the integrations are still
- * being provisioned.
+ * Mobile observability bootstrap. Stays a no-op until the SDKs are
+ * installed AND their env vars are set.
  *
- * To enable, set these in apps/mobile/.env:
- *   EXPO_PUBLIC_SENTRY_DSN
- *   EXPO_PUBLIC_POSTHOG_KEY
- *   EXPO_PUBLIC_POSTHOG_HOST   (defaults to https://app.posthog.com)
+ * Metro disallows `import(name)` with a variable, so we don't try to
+ * lazy-load the SDKs from this file. When you install them, this is the
+ * single place to wire them — no other change elsewhere needed.
  *
- * Then install the SDKs:
- *   pnpm -F @4play/mobile add @sentry/react-native posthog-react-native
+ * To enable Sentry:
+ *   1. pnpm -F @4play/mobile add @sentry/react-native
+ *   2. set EXPO_PUBLIC_SENTRY_DSN in apps/mobile/.env
+ *   3. uncomment the Sentry block below.
  *
- * Both are kept out of the workspace by default to avoid pulling
- * native modules before the user wants telemetry on.
+ * To enable PostHog:
+ *   1. pnpm -F @4play/mobile add posthog-react-native
+ *   2. set EXPO_PUBLIC_POSTHOG_KEY in apps/mobile/.env
+ *   3. uncomment the PostHog block below.
  */
-
-type SentryLike = {
-  init: (options: { dsn: string; tracesSampleRate?: number }) => void;
-  captureException: (e: unknown, hint?: { extra?: Record<string, unknown> }) => void;
-  captureMessage: (m: string, hint?: { extra?: Record<string, unknown> }) => void;
-};
-
-type PosthogLike = {
-  capture: (event: string, props?: Record<string, unknown>) => void;
-  identify: (userId: string, traits?: Record<string, unknown>) => void;
-  reset: () => void;
-};
-
-async function tryImport<T>(name: string): Promise<T | null> {
-  try {
-    return (await import(/* @vite-ignore */ name)) as T;
-  } catch {
-    return null;
-  }
-}
-
 export async function initObservability() {
   const sentryDsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
   const posthogKey = process.env.EXPO_PUBLIC_POSTHOG_KEY;
-  const posthogHost = process.env.EXPO_PUBLIC_POSTHOG_HOST ?? 'https://app.posthog.com';
 
-  if (sentryDsn) {
-    const Sentry = await tryImport<SentryLike>('@sentry/react-native');
-    if (Sentry) {
-      Sentry.init({ dsn: sentryDsn, tracesSampleRate: 0.2 });
-      installErrors({
-        captureException: (e, ctx) => Sentry.captureException(e, { extra: ctx }),
-        captureMessage: (m, ctx) => Sentry.captureMessage(m, { extra: ctx }),
-      });
-    }
-  }
+  // --- Sentry (uncomment after installing @sentry/react-native) ---------
+  // if (sentryDsn) {
+  //   const Sentry = require('@sentry/react-native');
+  //   Sentry.init({ dsn: sentryDsn, tracesSampleRate: 0.2 });
+  //   installErrors({
+  //     captureException: (e, ctx) => Sentry.captureException(e, { extra: ctx }),
+  //     captureMessage: (m, ctx) => Sentry.captureMessage(m, { extra: ctx }),
+  //   });
+  // }
 
-  if (posthogKey) {
-    const mod = await tryImport<{
-      PostHog: new (key: string, opts: { host: string }) => PosthogLike;
-    }>('posthog-react-native');
-    if (mod) {
-      const client = new mod.PostHog(posthogKey, { host: posthogHost });
-      installAnalytics({
-        capture: (event, props) =>
-          client.capture(event, props as Record<string, unknown> | undefined),
-        identify: (userId, traits) =>
-          client.identify(userId, traits as Record<string, unknown> | undefined),
-        reset: () => client.reset(),
-      });
-    }
+  // --- PostHog (uncomment after installing posthog-react-native) --------
+  // if (posthogKey) {
+  //   const { PostHog } = require('posthog-react-native');
+  //   const host = process.env.EXPO_PUBLIC_POSTHOG_HOST ?? 'https://app.posthog.com';
+  //   const client = new PostHog(posthogKey, { host });
+  //   installAnalytics({
+  //     capture: (event, props) => client.capture(event, props),
+  //     identify: (userId, traits) => client.identify(userId, traits),
+  //     reset: () => client.reset(),
+  //   });
+  // }
+
+  if ((sentryDsn || posthogKey) && __DEV__) {
+    console.warn(
+      '[observability] DSN/key present but SDK not wired yet — see lib/observability.ts.',
+    );
   }
+  void installAnalytics;
+  void installErrors;
 }
