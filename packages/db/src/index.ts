@@ -1,3 +1,10 @@
-// Database types are generated from Supabase during Step 2 via:
-//   supabase gen types typescript --project-id <id> > packages/db/src/database.types.ts
-export {};
+export type {
+  CompositeTypes,
+  Database,
+  Enums,
+  Json,
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+} from "./database.types";
+export { Constants } from "./database.types";
