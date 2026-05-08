@@ -18,13 +18,13 @@ import {
   JetBrainsMono_600SemiBold,
 } from '@expo-google-fonts/jetbrains-mono';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { supabase } from '../lib/supabase';
+import { useAuthState } from '../lib/auth';
 
 SplashScreen.preventAutoHideAsync().catch(() => {
   // Splash already hidden — no-op.
@@ -51,29 +51,23 @@ export default function RootLayout() {
     JetBrainsMono_600SemiBold,
   });
 
-  const [hasSession, setHasSession] = useState<boolean | null>(null);
+  const auth = useAuthState();
+  const segments = useSegments();
+  const router = useRouter();
 
   useEffect(() => {
-    let mounted = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (mounted) setHasSession(!!data.session);
-    });
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (mounted) setHasSession(!!session);
-    });
-    return () => {
-      mounted = false;
-      subscription.subscription.unsubscribe();
-    };
-  }, []);
+    if (!fontsLoaded || auth.status === 'loading') return;
+    SplashScreen.hideAsync().catch(() => {});
 
-  useEffect(() => {
-    if (fontsLoaded && hasSession !== null) {
-      SplashScreen.hideAsync().catch(() => {});
+    const inAuthGroup = segments[0] === '(auth)';
+    if (auth.status === 'unauthenticated' && !inAuthGroup) {
+      router.replace('/(auth)/onboarding');
+    } else if (auth.status === 'authenticated' && inAuthGroup) {
+      router.replace('/');
     }
-  }, [fontsLoaded, hasSession]);
+  }, [fontsLoaded, auth.status, segments, router]);
 
-  if (!fontsLoaded || hasSession === null) {
+  if (!fontsLoaded || auth.status === 'loading') {
     return null;
   }
 
@@ -86,9 +80,7 @@ export default function RootLayout() {
               headerShown: false,
               contentStyle: { backgroundColor: '#F4F0E8' },
             }}
-          >
-            <Stack.Screen name="index" />
-          </Stack>
+          />
           <StatusBar style="dark" />
         </QueryClientProvider>
       </SafeAreaProvider>
