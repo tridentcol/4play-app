@@ -1,0 +1,9 @@
+{
+  "extends": "./packages/config/tsconfig.base.json",
+  "include": [],
+  "references": [
+    { "path": "./packages/ui" },
+    { "path": "./packages/core" },
+    { "path": "./packages/db" }
+  ]
+}

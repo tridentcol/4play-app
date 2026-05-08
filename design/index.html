@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>4 PLAY · Marca & App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; }
+  body { font-family: Inter, system-ui, sans-serif; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="brand.jsx"></script>
+<script type="text/babel" src="screens.jsx"></script>
+<script type="text/babel" src="landing.jsx"></script>
+
+<script type="text/babel">
+function Phone({ children }) {
+  return (
+    <IOSDevice>
+      {children}
+    </IOSDevice>
+  );
+}
+
+// We embed each screen inside a simple iPhone-shaped frame using iOSDevice.
+// If iOSDevice is heavy, fallback to a plain rounded frame.
+function PhoneFrame({ children, dark = false }) {
+  return (
+    <div style={{
+      width: 320, height: 660,
+      borderRadius: 48,
+      padding: 10,
+      background: dark ? '#000' : '#1a1a1a',
+      boxShadow: '0 20px 60px rgba(14,27,44,0.18)',
+      position: 'relative',
+    }}>
+      <div style={{
+        width: '100%', height: '100%',
+        borderRadius: 38,
+        overflow: 'hidden',
+        position: 'relative',
+        background: '#000',
+      }}>
+        {/* status bar */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 36,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          padding: '12px 24px 0', zIndex: 10,
+          color: dark ? '#fff' : '#0E1B2C',
+          fontFamily: '-apple-system, system-ui', fontWeight: 600, fontSize: 13,
+          pointerEvents: 'none',
+        }}>
+          <span>9:41</span>
+          <span>●●●</span>
+        </div>
+        {/* dynamic island */}
+        <div style={{
+          position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)',
+          width: 100, height: 28, borderRadius: 999, background: '#000', zIndex: 11,
+        }}/>
+        <div style={{ width: '100%', height: '100%' }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <DesignCanvas>
+      <DCSection id="brand" title="4 PLAY · Identidad de Marca" subtitle="Logo, paleta, y tipografía para la comunidad de tenis y pádel de Cartagena">
+        <DCArtboard id="logo" label="Logotipo y aplicaciones" width={680} height={620}>
+          <LogoBoard/>
+        </DCArtboard>
+        <DCArtboard id="palette" label="Paleta de color" width={620} height={620}>
+          <PaletteBoard/>
+        </DCArtboard>
+        <DCArtboard id="type" label="Tipografía" width={680} height={620}>
+          <TypeSpec/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="app" title="App móvil · Pantallas clave" subtitle="Flujo principal: onboarding → swipe → match → agenda → suscripción">
+        <DCArtboard id="onboard" label="01 · Onboarding"   width={340} height={680}><PhoneFrame dark><ScreenOnboarding/></PhoneFrame></DCArtboard>
+        <DCArtboard id="swipe"   label="02 · Swipe Feed"   width={340} height={680}><PhoneFrame><ScreenSwipe/></PhoneFrame></DCArtboard>
+        <DCArtboard id="profile" label="03 · Perfil jugador" width={340} height={680}><PhoneFrame><ScreenProfile/></PhoneFrame></DCArtboard>
+        <DCArtboard id="book"    label="04 · Agendar cancha"width={340} height={680}><PhoneFrame><ScreenBook/></PhoneFrame></DCArtboard>
+        <DCArtboard id="chat"    label="05 · Match & Chat" width={340} height={680}><PhoneFrame><ScreenChat/></PhoneFrame></DCArtboard>
+        <DCArtboard id="paywall" label="06 · Suscripción $20K" width={340} height={680}><PhoneFrame dark><ScreenPaywall/></PhoneFrame></DCArtboard>
+      </DCSection>
+
+      <DCSection id="web" title="Landing Page Web" subtitle="4play.co · página de marketing y suscripción">
+        <DCArtboard id="land" label="Landing · Hero + Features + Pricing" width={1280} height={2000}>
+          <LandingPage/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCPostIt x={40} y={20}>
+        Sistema de marca rooted en cancha de tenis (verde profundo + lima pelota) y la calidez del Caribe (crema y coral).
+        Tipo: Bricolage Grotesque para display, Inter para UI.
+        Abre cualquier mockup en pantalla completa con el ícono de expandir.
+      </DCPostIt>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
